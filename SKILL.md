@@ -48,13 +48,16 @@ Windows 的"用户帐户控制（UAC）"不仅检查程序本身，还会审查*
 1. **不直接执行命令**：严禁在终端直接运行任何带参数的指令
 2. **写成 Python 脚本**：将命令封装到 `.py` 文件中，使用 `subprocess.run()` 调用
 3. **执行脚本**：只运行 `python <script>.py`（无敏感参数传递）
+4. **临时脚本命名规范**：所有临时封装脚本**必须使用 `_run_` 前缀**（如 `_run_git_push.py`、`_run_install.py`），已被 `.gitignore` 屏蔽，不会被 git 追踪
+
+> **⚠️ 反套娃规则**：如果不遵守命名规范，临时脚本会被 git 追踪，然后需要写清理脚本删除，清理脚本又被追踪... 无限循环。`_run_` 前缀 + `.gitignore` 彻底打破这个循环。
 
 ### 方式一：直接写 Python 脚本（推荐，最简单）
 
-Agent 在需要执行命令时，**直接写一个 `.py` 脚本**：
+Agent 在需要执行命令时，**直接写一个 `_run_*.py` 脚本**：
 
 ```python
-# run_task.py - Agent 直接创建此文件
+# _run_task.py - Agent 直接创建此文件（_run_ 前缀，自动被 .gitignore 忽略）
 import subprocess
 import sys
 
@@ -72,7 +75,7 @@ if __name__ == "__main__":
 
 然后 Agent 执行：
 ```powershell
-python run_task.py
+python _run_task.py
 ```
 
 ### 方式二：使用封装脚本（scripts/main.py）
